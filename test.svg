@@ -1,0 +1,45 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" width="900px" height="300px">
+
+<defs>
+    <marker id="Triangle_green" stroke="green" fill="green"
+      viewBox="0 0 10 10" refX="0" refY="5"
+      markerUnits="strokeWidth"
+      markerWidth="4" markerHeight="3"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+    <marker id="Triangle_blue" stroke="blue" fill="blue"
+      viewBox="0 0 10 10" refX="0" refY="5"
+      markerUnits="strokeWidth"
+      markerWidth="4" markerHeight="3"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+    <marker id="Triangle_black" stroke="black" fill="black"
+      viewBox="0 0 10 10" refX="0" refY="5"
+      markerUnits="strokeWidth"
+      markerWidth="4" markerHeight="3"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+    <marker id="Triangle_red" stroke="red" fill="red"
+      viewBox="0 0 10 10" refX="0" refY="5"
+      markerUnits="strokeWidth"
+      markerWidth="4" markerHeight="3"
+      orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+  </defs>
+<g stroke = "black" stroke-width = "4.000000" fill = "none"><path d = "M 200.000000 200.000000 L 331.420000 200.000000" marker-end="url(#Triangle_black)"/> </g>
+<g stroke = "green" stroke-width = "3.000000" fill = "none"><path d = "M 43.260000 190.000000 L 268.600000 190.000000" marker-end="url(#Triangle_green)"/> </g>
+<g stroke = "blue" stroke-width = "3.000000" fill = "none"><path d = "M 271.320000 180.000000 L 104.440000 180.000000" marker-end="url(#Triangle_blue)"/> </g>
+<g stroke = "blue" stroke-width = "3.000000" fill = "none"><path d = "M 285.540000 170.000000 L 136.260000 170.000000" marker-end="url(#Triangle_blue)"/> </g>
+<g stroke = "green" stroke-width = "3.000000" fill = "none"><path d = "M 159.180000 160.000000 L 296.400000 160.000000" marker-end="url(#Triangle_green)"/> </g>
+<g stroke = "blue" stroke-width = "3.000000" fill = "none"><path d = "M 330.340000 150.000000 L 170.080000 150.000000" marker-end="url(#Triangle_blue)"/> </g>
+<g stroke = "red" stroke-width = "3.000000" fill = "none"><path d = "M 200.000000 140.000000 L 331.420000 140.000000" marker-end="url(#Triangle_red)"/> </g>
+<g stroke = "blue" stroke-width = "3.000000" fill = "none"><path d = "M 399.180000 130.000000 L 224.280000 130.000000" marker-end="url(#Triangle_blue)"/> </g>
+<g stroke = "green" stroke-width = "3.000000" fill = "none"><path d = "M 284.840000 120.000000 L 463.480000 120.000000" marker-end="url(#Triangle_green)"/> </g>
+<g stroke = "green" stroke-width = "3.000000" fill = "none"><path d = "M 309.160000 110.000000 L 475.560000 110.000000" marker-end="url(#Triangle_green)"/> </g>
+</svg>
