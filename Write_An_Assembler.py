@@ -52,7 +52,7 @@
 # This is about 23x of average length of 6.2kb reads of E. coli K12 genome. The
 # mean sequence identity when aligning the pre-assembled reads to the canonical
 # E. coli K12 reference is 99.787% (median identity = 99.921%). The pre-assembled
-# read data is available for download from DROPBOX_XXXX. According the
+# read data is available for download from https://www.dropbox.com/s/ybsxsfe5ppb04hx/pre_assembled_reads.fa. According the
 # Lander-Waterman statistics, this set of reads is enough to get single contig
 # for the single chromosome. The only thing one needs to worry about is that
 # whether the repeats in genome can be uniquely. Since it is shown one can use
@@ -62,8 +62,8 @@
 # libraries, to resolve long repeats from short read (~100bp) data. For example,
 # ALLPATHS-LG can use multiple short-read libraries and long read data to get
 # perfect assemblies for bacteria
-# (http://genome.cshlp.org/content/early/2012/07/24/gr.141515.112.abstract and
-# http://www.broadinstitute.org/software/allpaths-lg/blog/?page_id=14). However,
+# ( http://genome.cshlp.org/content/early/2012/07/24/gr.141515.112.abstract and
+# http://www.broadinstitute.org/software/allpaths-lg/blog/?page_id=14 ). However,
 # when one can get long range information from one single library, the assembly
 # process can be probably greatly simplified.  As demonstrated here, one can 
 # actually get pretty good assembly using Python code with blasr for overlapping and
@@ -86,7 +86,7 @@
 # When I use Celera Assembler (CA) to assemble genomes, I always try to peek the
 # intermediate data in order to understand the process better and maybe fix few
 # things manually. Michael Schatz (http://schatzlab.cshl.edu/ , twitter:
-# @mike_schatz ) and Adam Phillippy ( twitter: @aphillipy ) both pointed to me
+# @mike_schatz ) and Adam Phillippy ( twitter: @aphillippy ) both pointed to me
 # some very useful information about CA.  (Thanks, Michael and Adam.)
 # ``tigStore`` is a very useful command to see the relationship between the
 # generated unitigs and the initial DNA fragments.  The file
@@ -97,17 +97,17 @@
 # 
 # This IPython notebook is just a "Notebook". I write these code for fun and for
 # (self-)educational purposes. It shows that given the good long read data and
-# the proper tools ``blasr`` (https://github.com/PacificBiosciences/blasr),
-# ``pbdagcon/HBAR-DTK`` (https://github.com/PacificBiosciences/pbdagcon,
-# https://github.com/PacificBiosciences/HBAR-DTK), and ``quiver``
-# (https://github.com/PacificBiosciences/GenomicConsensus) one can learn how to
+# the proper tools ``blasr`` ( https://github.com/PacificBiosciences/blasr ),
+# ``pbdagcon/HBAR-DTK`` ( https://github.com/PacificBiosciences/pbdagcon ,
+#  https://github.com/PacificBiosciences/HBAR-DTK ), and ``quiver``
+# ( https://github.com/PacificBiosciences/GenomicConsensus)  one can learn how to
 # do genome assembly with a "not-so-high-performance" language ``Python``.  The
-# great ``IPython Notebook`` (http://ipython.org/) allows me to try out different
+# great ``IPython Notebook`` ( http://ipython.org/ ) allows me to try out different
 # code snippet and different algorithm ideas without a lot of overhead. One
 # should notice this code in this ``IPython Notebook`` is mainly for fun, not for
 # "production". I chose the least resistant path for coding.  Coding style and
 # code performance were considered but not taking seriously as I was doing a lot
-# of experiments when I coded this notebook.
+# of experiments for different algorithm approaches when I coded this notebook.
 # 
 # I consider this Notebook is as a personal project for fun. The data and the
 # used software can be all downloaded publicly.  Although I am an employee of
@@ -378,25 +378,43 @@ def svg_line( x1, y1, x2, y2, col, w):
     return """<g stroke = "%s" stroke-width = "%f" fill = "none">\
 <path d = "M %f %f L %f %f"/> </g>""" % (col, w, x1, y1, x2, y2)
 
-class SVG_view:
-    def __init__(self, filename):
-        self.filename = filename
+class Overlap_SVG_view:
+    def __init__(self):
         self.header = """<?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" width="900px" height="300px">
 """
         self.footer = """</svg>"""
         self.elements = []
+        self._svg_data = None
         
     def add_element(self, elm):
         self.elements.append(elm)
         
-    def output(self):
-        with open(self.filename, "w") as out_f:
-            print >> out_f, self.header
-            for elm in self.elements:
-                print >> out_f, elm
-            print >> out_f, self.footer
+    def _construct_SVG(self):
+        SVG_str = []
+        SVG_str.append( self.header )
+        for elm in self.elements:
+            SVG_str.append( elm )
+        SVG_str.append( self.footer )
+        self._svg_data = "\n".join(SVG_str)
+        self._svg_data = self._svg_data.decode('utf-8')
+
+    def output(self, filename):
+        if self._svg_data is None:
+            self._construct_SVG()
+        with open(filename, "w") as out_f:
+            print >> out_f, self._svg_data
+            
+    def _repr_svg_(self):
+        if self._svg_data is None:
+            self._construct_SVG()
+        return self._svg_data
+        
+    @property
+    def svg(self):
+        return SVG(self._repr_svg_())
+            
 
 # <markdowncell>
 
@@ -408,13 +426,14 @@ class SVG_view:
 # <codecell>
 
 from IPython.display import SVG
+
 import os
 
-def generate_overlap_view(overlap_data, q_name, out_fn):
+def generate_overlap_view(overlap_data, q_name):
     containment_tolerance = 10
     
     hits = overlap_data[q_name].hits
-    SV = SVG_view(out_fn)
+    SV = Overlap_SVG_view()
     SV.add_element(arrow_defs)
     x_offset = 10000
     x_scaling = 0.02
@@ -459,11 +478,12 @@ def generate_overlap_view(overlap_data, q_name, out_fn):
         x1 *= x_scaling
         x2 *= x_scaling
         SV.add_element(svg_arrow(x1, y, x2, y, col, 3))
-    SV.output()
+    return SV
     
 q_name = overlap_data.keys()[0]
-generate_overlap_view(overlap_data, q_name, "./test.svg")
-SVG(filename="./test.svg")
+OSV = generate_overlap_view(overlap_data, q_name)
+OSV.output("test.svg")
+#display(OSV.svg)
 
 # <markdowncell>
 
@@ -565,7 +585,10 @@ def find_path( q_name_end, frag_used = set() ):
         
     while 1:
         if q_name in frag_used:
-            return [], "frag_used"
+            if reversing_path:
+                path.reverse()
+            return path, "frag_used"
+        
         path.append( (q_name, end) )
         path_q_name.add(q_name)
         if q_name not in best_overlap_graph:
@@ -745,27 +768,40 @@ while len(unused_frag) != 0:
     len_qname = [ (overlap_data[x].length, x) for x in unused_frag  ]
     len_qname.sort()
     q_name = len_qname[-1][1]
+    print "iteration: ",i
+    print "frag is used?", q_name in frag_used
+    if q_name in frag_used:
+        continue
 
     path_5p, s_5p = find_path( (q_name, "5p"), frag_used  )
     path_3p, s_3p = find_path( (q_name, "3p"), frag_used  )
-    print "iteration: ",i
     print "seeding frag:", q_name, "Length:", overlap_data[q_name].length
     print "number of unused frag:", len(unused_frag), "total overlapped frag:", len(path_3p)+len(path_5p)
+    print len(path_5p), s_5p, len(path_3p), s_3p
     print "--------------------------"
     #print path_5p[0], path_3p[-1]
     if len(path_5p) + len(path_3p) == 0:
+        out_fn = "tig_%05d.fa" % i
+        tig_name ="tig%05d" % i
+        with open("singleton_"+out_fn, "w") as out_seq_file:
+            seq = seq_db[q_name]
+            print >>out_seq_file, ">%s" % ( "singleton_" + tig_name  )
+            print >>out_seq_file, seq
         frag_used.add(q_name)
         unused_frag = all_best_overlap_frags - frag_used
         i += 1
         continue
         
     if len(path_5p) > 0:
-        full_path = path_5p+path_3p[1:]
+        #assert path_5p[-1] == path_3p[0]
+
+        full_path = path_5p + path_3p[1:]
     else:
         full_path = path_3p
     layout_path(full_path, frag_used, "tig_%05d.fa" % i, "tig%05d" % i)
     unused_frag = all_best_overlap_frags - frag_used
     i += 1
+
 
 # <markdowncell>
 
@@ -784,7 +820,7 @@ while len(unused_frag) != 0:
 # How good is the main contig?
 # ============================
 # 
-# The main contig is 4650011bp. It seems that it should cover the whole genome.  We can see the whole genome alignment using ``gepard`` (http://www.helmholtz-muenchen.de/en/mips/services/analysis-tools/gepard/index.html). We can see there is no larger scale mis-assembly. Promising!!
+# The main contig is 4650011bp. It seems that it should cover the whole genome.  We can see the whole genome alignment using ``gepard`` ( http://www.helmholtz-muenchen.de/en/mips/services/analysis-tools/gepard/index.html ). We can see there is no larger scale mis-assembly. Promising!!
 # (The strand of the K12 for this data is actuall slight different from the canonical one. We do expect to see some small structure variations.)
 
 # <codecell>
@@ -795,11 +831,11 @@ Image(filename="tig_align.jpeg")
 
 # Accuracy?
 # ---------
-# We don't expect to get high accuracy from the "draft" assembly as the way we construct the contig is just copy-and-paste from the pre-assembled reads which have mean identity 99.789% to the reference genome. For a 4.7Mb genome, we will expect 4700000 * (1-0.99787) ~ 10k differences. One can do another round of conseusns using the pre-assembled reads. Or, we can align the raw reads on top of the draft contig and apply the "Quiver" algorithm to get the best accuracy from all raw data. Let's see how "Quiver" helps to remove the errors in the draft contig.
+# We don't expect to get high accuracy from the "draft" assembly. The way we construct the contig is just to copy-and-paste from the pre-assembled reads which have mean identity 99.789% to the reference genome. For a 4.7Mb genome, we will expect 4700000 * (1-0.99787) ~ 10k differences. One can do another round of consensus using the pre-assembled reads. Or, we can align the raw reads on top of the draft contig and apply the "Quiver" algorithm to get the best accuracy from all raw data. Let's see how "Quiver" helps to remove the errors in the draft contig.
 
 # <markdowncell>
 
-# First, let's evalute the differece between the draft contigs to the canonical reference with the ``dnadiff`` from Mummer3
+# First, let's evalute the differece between the draft contigs to the canonical reference with the ``dnadiff`` from Mummer3 package ( http://mummer.sourceforge.net/ )
 
 # <codecell>
 
@@ -828,7 +864,8 @@ Image(filename="tig_align.jpeg")
 #     variantCaller.py --algorithm quiver -j 16 --referenceFilename assembly/sequence/assembly.fasta \
 #     --parameters best -o output.gff  -o output.fasta -o output.fastq -q 0  -X 80 -x 5 --mapQvThreshold 0 out.cmp.h5
 # 
-# This will generate the consensus sequence using Quiver. The consensus output is in ``output.fasta``. We find 26 SNPs in the final consensus results. This give a lower bound of the final assembly phred QV about -10*log10(26/4639675) = 52.5.
+# This will generate the consensus sequence using Quiver. The consensus output is in ``output.fasta``. We find 26 SNPs in the final consensus results. This gives a lower bound of the final assembly phred QV about -10*log10(26/4639675) = 52.5.  One can see that the ``Quiver`` algorithm which utilizes all important information from the raw trace signal is able to correct the ~10k errors in the
+# draft assembly. This allows us more freedom while constructing the initial draft assembly.  We do not need to construct perfect draft assembly from perfect reads. The goal for constructing the draft is to get the contiguity right. Given the long reads, one can expect that most mapping is unambiguous and that will lead to almost perfect consensus using ``Quiver``.
 
 # <codecell>
 
@@ -861,13 +898,20 @@ print "The concordnace is about %0.5f%%" % (100*(1-26.0/4639675))
 # Such constraints can not be solved by simply sequencing more (see Tse's argument).
 # Actually, regardless how cheap DNA sequencing is, without proper understanding
 # the fundamental theories and mathematical constraints, one could just waste
-# money collecting tons of useless data.  Cheap data still cost money. Cheap data
+# money collecting tons of useless data.  Cheap data still costs money. Cheap data
 # that can not solve problems is actually expansive. One can sequence E coli. K12 genome
 # to 10000x coverage with short read technologies cheaply. However, without
 # proper libraries to get long range information, 10000x coverage from short fragments 
 # will still lead to fragmented assemblies. One the other hand, one can see from
 # the example in this ``IPython`` Notebook. Once we can generate good quality long reads,
 # even an assembly newbie like me can put together a prototype of an assembler with python
-# in a few days. By the way, it only takes 20 seconds to get the draft assembly from the
-# ``m4`` file.
+# in a few days. By the way, it only takes 20 seconds on my 2012 MacBook Air (Intel i7) to 
+# get the draft assembly from the ``m4`` file.
+
+# <codecell>
+
+#!time python Write_An_Assembler.py > /dev/null
+
+# <codecell>
+
 
